@@ -1,0 +1,13 @@
+---
+title: "Course information"
+author: "Vishal"
+date: "25/01/2017"
+output: html_document
+---
+
+### Something about the course
+
+This is an introductory course for Open Data Science. The lectures and hands on exercises are conducted every Thurday from 8-10am at Unioninkatu 35. The course started on 19.01.2017 and we need to submit the final assignment on 10.03.2017.The course is taught by **Kimmo Vehkalahti**.  
+
+[Course Diary link]
+<https://vishalrossi.github.io/IODS-project/>
