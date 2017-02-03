@@ -1,7 +1,69 @@
-# Insert chapter 2 title here
+# Regression and model validation
 
-*Describe the work you have done this week and summarize your learning.*
+*During second week most interestingly I have been learning single and multiple regression analysis and model fitting*
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
+#### 1. Read and explore the data 
+learning2014 <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt", sep = ",", header = T) 
+
+dim( learning2014 )
+head( learning2014 )
+str( learning2014 )
+
+*This data comes from an international survey from a class of students enrolled to Introduction to Social Statistics (fall 2014).*
+*The data was collected between 3.12.2014 - 10.01.2015 and created on 14.01.2015.*
+*The sample size is 183 with 63 variables, however we selected variables of our interest and filtered the data for points > 0.*
+*After cleaning the data, we end up with 166 subjects and 7 variables to analyse.*
+
+
+#### 2. Graphical overview of the data
+##### load libraries
+library(GGally)
+library(ggplot2)
+
+plot_data <- ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+####Draw the plot and summarise
+plot_data
+summary(learning2014)
+
+#### Discription:
+*1) Total number of males are 50% less than females.*
+*2) Attitute is much higher in males.*
+*3) Deep and surface questions have negative correlations in males whereas in females it's almost not correlating*
+*4) Based on the summary analysis deep, surface, strategic questions and points are normally distributed as they have simillar mean and median values.*
+
+#### 3. Regression model
+
+regression_model <- lm(points ~ attitude + stra + surf, data = learning2014)
+summary(regression_model)
+
+*In this multivariate model, we are explaining the variable points against attitude, stra and surf i.e. the explainatory variables.*
+*Based on the regression model, points have significant relationship with attitude.*
+*stra and surf show no significant relationship with points*
+*R-squared value of 0.20 implies that the model can explain 20% or one-fifth of the variation in the outcome.*
+
+
+#### 4 Interpret the model parameters after removing stra and surf
+new_regression_model <- lm(points ~ attitude, data = learning2014)
+summary(new_regression_model)
+
+*This univariate model shoes  that  points is significantly realted to attitude *
+*Multiple R-squared:  0.1151*
+*R-squared = Explained variation / Total variation*
+*R-squared is always between 0 and 100%:*
+*0% indicates that the model explains none of the variability of the response data around its mean.*
+*100% indicates that the model explains all the variability of the response data around its mean.*
+*Multiple R-squared is used for evaluating how well the model fits the data. In this case, R-squared value of 0.11 implies that the model can explain only 11% of the variation in the outcome.*
+
+#### 5 Diagnostic plots
+plot(new_regression_model, which = c(1, 2, 5), par(mfrow = c(2,2)) )
+
+*Assumptions of the model*
+*1. How well the model descrices the variables we are interested in*
+*2. Linearity: The target variable is modelled as a linear combination of the model parameters*
+*3. Errors are normally disrtibuted, not correlated and have constant variance*
+
+*Residual vs Fitted plot explains about variance in errors. We could see that some errors deviate from the regression line implying that there is issue with the model*
+*QQplot of our model shows that most points fall close to the line but some points are not close on the left hand side of the graph, hence the fit is somewhere near to the normality assumption. The model is reasonably okay.*
+*Leverage plot shows the impact of a single observation on the model. There are some observations (values of -3) that have a high impact on the model which is not good.*
+
