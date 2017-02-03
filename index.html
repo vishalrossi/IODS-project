@@ -141,12 +141,8 @@ $(document).ready(function () {
 <div id="TOC">
 <ul>
 <li><a href="#about-the-project">About the project</a></li>
-<li><a href="#introduction-to-open-data-science">Introduction to Open Data Science</a><ul>
-<li><a href="#course-for-spring-2017">Course for Spring 2017</a></li>
-<li><a href="#we-meet-each-week-on-thursday-from-8am-to-10am-in-unioninkatu35-to-learn-about-data-science">We meet each week on Thursday from 8am to 10am in Unioninkatu35 to learn about Data Science</a></li>
-<li><a href="#tools-r-and-github">Tools: R and GitHub</a></li>
-</ul></li>
-<li><a href="#insert-chapter-2-title-here">Insert chapter 2 title here</a></li>
+<li><a href="#introduction-to-open-data-science">Introduction to Open Data Science</a></li>
+<li><a href="#regression-and-model-validation">Regression and model validation</a></li>
 </ul>
 </div>
 
@@ -157,27 +153,56 @@ $(document).ready(function () {
 </div>
 <div id="introduction-to-open-data-science" class="section level1">
 <h1>Introduction to Open Data Science</h1>
-<div id="course-for-spring-2017" class="section level2">
-<h2>Course for Spring 2017</h2>
-</div>
-<div id="we-meet-each-week-on-thursday-from-8am-to-10am-in-unioninkatu35-to-learn-about-data-science" class="section level2">
-<h2>We meet each week on Thursday from 8am to 10am in Unioninkatu35 to learn about Data Science</h2>
-</div>
-<div id="tools-r-and-github" class="section level2">
-<h2>Tools: R and GitHub</h2>
-<p>[link to GitHub] (<a href="https://github.com/vishalrossi/IODS-project" class="uri">https://github.com/vishalrossi/IODS-project</a>)</p>
+<p>Spring 2017</p>
+<p>We meet each week on Thursday from 8am to 10am in Unioninkatu35 to learn about Data Science</p>
+<div id="tools-r-and-github" class="section level5">
+<h5>Tools: R and GitHub</h5>
+<p>[GitHub link] <a href="https://github.com/vishalrossi/IODS-project" class="uri">https://github.com/vishalrossi/IODS-project</a></p>
 <hr />
 </div>
 </div>
-<div id="insert-chapter-2-title-here" class="section level1">
-<h1>Insert chapter 2 title here</h1>
-<p><em>Describe the work you have done this week and summarize your learning.</em></p>
-<ul>
-<li>Describe your work and results clearly.</li>
-<li>Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods</li>
-<li>Assume the reader has no previous knowledge of your data or the more advanced methods you are using</li>
-</ul>
+<div id="regression-and-model-validation" class="section level1">
+<h1>Regression and model validation</h1>
+<p><em>During second week most interestingly I have been learning single and multiple regression analysis and model fitting</em></p>
+<div id="read-and-explore-the-data" class="section level4">
+<h4>1. Read and explore the data</h4>
+<p>learning2014 &lt;- read.table(“<a href="http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt" class="uri">http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt</a>”, sep = “,”, header = T)</p>
+<p>dim( learning2014 ) head( learning2014 ) str( learning2014 )</p>
+<p><em>This data comes from an international survey from a class of students enrolled to Introduction to Social Statistics (fall 2014).</em> <em>The data was collected between 3.12.2014 - 10.01.2015 and created on 14.01.2015.</em> <em>The sample size is 183 with 63 variables, however we selected variables of our interest and filtered the data for points &gt; 0.</em> <em>After cleaning the data, we end up with 166 subjects and 7 variables to analyse.</em></p>
+</div>
+<div id="graphical-overview-of-the-data" class="section level4">
+<h4>2. Graphical overview of the data</h4>
+<div id="load-libraries" class="section level5">
+<h5>load libraries</h5>
+<p>library(GGally) library(ggplot2)</p>
+<p>plot_data &lt;- ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap(“facethist”, bins = 20)))</p>
+</div>
+</div>
+<div id="draw-the-plot-and-summarise" class="section level4">
+<h4>Draw the plot and summarise</h4>
+<p>plot_data summary(learning2014)</p>
+</div>
+<div id="discription" class="section level4">
+<h4>Discription:</h4>
+<p><em>1) Total number of males are 50% less than females.</em> <em>2) Attitute is much higher in males.</em> <em>3) Deep and surface questions have negative correlations in males whereas in females it’s almost not correlating</em> <em>4) Based on the summary analysis deep, surface, strategic questions and points are normally distributed as they have simillar mean and median values.</em></p>
+</div>
+<div id="regression-model" class="section level4">
+<h4>3. Regression model</h4>
+<p>regression_model &lt;- lm(points ~ attitude + stra + surf, data = learning2014) summary(regression_model)</p>
+<p><em>In this multivariate model, we are explaining the variable points against attitude, stra and surf i.e. the explainatory variables.</em> <em>Based on the regression model, points have significant relationship with attitude.</em> <em>stra and surf show no significant relationship with points</em> <em>R-squared value of 0.20 implies that the model can explain 20% or one-fifth of the variation in the outcome.</em></p>
+</div>
+<div id="interpret-the-model-parameters-after-removing-stra-and-surf" class="section level4">
+<h4>4 Interpret the model parameters after removing stra and surf</h4>
+<p>new_regression_model &lt;- lm(points ~ attitude, data = learning2014) summary(new_regression_model)</p>
+<p><em>This univariate model shoes that points is significantly realted to attitude </em> <em>Multiple R-squared: 0.1151</em> <em>R-squared = Explained variation / Total variation</em> <em>R-squared is always between 0 and 100%:</em> <em>0% indicates that the model explains none of the variability of the response data around its mean.</em> <em>100% indicates that the model explains all the variability of the response data around its mean.</em> <em>Multiple R-squared is used for evaluating how well the model fits the data. In this case, R-squared value of 0.11 implies that the model can explain only 11% of the variation in the outcome.</em></p>
+</div>
+<div id="diagnostic-plots" class="section level4">
+<h4>5 Diagnostic plots</h4>
+<p>plot(new_regression_model, which = c(1, 2, 5), par(mfrow = c(2,2)) )</p>
+<p><em>Assumptions of the model</em> <em>1. How well the model descrices the variables we are interested in</em> <em>2. Linearity: The target variable is modelled as a linear combination of the model parameters</em> <em>3. Errors are normally disrtibuted, not correlated and have constant variance</em></p>
+<p><em>Residual vs Fitted plot explains about variance in errors. We could see that some errors deviate from the regression line implying that there is issue with the model</em> <em>QQplot of our model shows that most points fall close to the line but some points are not close on the left hand side of the graph, hence the fit is somewhere near to the normality assumption. The model is reasonably okay.</em> <em>Leverage plot shows the impact of a single observation on the model. There are some observations (values of -3) that have a high impact on the model which is not good.</em></p>
 <hr />
+</div>
 </div>
 
 
