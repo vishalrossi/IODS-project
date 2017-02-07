@@ -5,15 +5,20 @@
 
 ###set working directory
 setwd = ("/Users/vsinha/IODS-project/")
+
+###install package
 library(dplyr)
 
 ###read the data
 file= read.table("http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt", header = T, sep = "\t")
 
-###structure of the data
+###structure and dimension of the data
 str(file)
 dim(file)
 ###file is a data frame of 183 rows and 63 coloums
+
+###rescale attitude
+file$attitude <- file$Attitude/10
 
 ###create analysis dataset
 deep_questions <- c("D03", "D11", "D19", "D27", "D07", "D14", "D22", "D30","D07","D14","D22","D30")
@@ -29,7 +34,7 @@ file$surf <- rowMeans(surface_columns)
 file$stra <- rowMeans(strategic_columns)
 
 ###select the specific columns to create analysis dataset 
-keep_columns <- c("gender","Age","Attitude", "deep", "stra", "surf", "Points")
+keep_columns <- c("gender","Age","attitude", "deep", "stra", "surf", "Points")
 data <- select(file, one_of(keep_columns))
 
 ###exclude observations where exam points equals to 0
