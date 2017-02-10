@@ -1,0 +1,274 @@
+---
+title: "chapter3.Rmd"
+author: "Vishal"
+date: "2/8/2017"
+output: html_document
+---
+
+#### Logistic regression
+#### Access the libraries needed for the exercise
+```{r}
+library(dplyr)
+```
+```{r}
+library(ggplot2)
+```
+```{r}
+library(boot)
+```
+
+#### 2. Read and explore the data
+```{r}
+alc = read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt", sep = ",", header = T)
+```
+```{r}
+dim(alc)
+```
+```{r}
+head(alc)
+```
+```{r}
+str(alc)
+```
+
+*This data comes from student alcohol consumption dataset, Porto (Portugal).*
+
+*The original sample size is 1044 with 32 variables, however we selected variables of our interest and filtered the data high alcohol usage > 2.*
+
+*After cleaning the data, we end up with 382 subjects and 35 variables to analyse.*
+
+#### 3. Purpose of analysis
+*The 4 variables that I have chosen for the analysis are:*
+
+*1. failures: When someone fails, the chances of drug/alcohol consumption is high*
+
+*2. health: I don't think that the state of health has any effect on alcohol consumption, however there might be a chance that unhealthy people tend to consume more alcohol*
+
+*3. age: In general, adults of all ages drink, so I don't think it accounts fot high alcohol consumption *
+
+*4. freetime: This factor could play a significant  role in alcohol consumption. If one is bored/have nothing to do, they may tend to consume more alcohol.*
+
+#### 4. More about data
+*Numerically and graphically explore the distributions of chosen variables and their relationships with alcohol consumption*
+
+*Box plots are made with and without sex differences*
+
+*Comments and comparision of findings and result at the end of this section*
+
+##### Numerical distribution of failures
+```{r}
+alc %>% group_by(high_use, sex, failures) %>% summarise(count =n())
+```
+
+##### Graphical distribution of failures
+```{r}
+failure = alc$failures
+d=density(failure) 
+plot(d)
+polygon(d, col="red", border="blue")
+```
+
+##### Relationship of failures with alcohol consumption
+```{r}
+ga <- ggplot(alc, aes(x = high_use, y = failures))
+ga + geom_boxplot()
+g1 <- ggplot(alc, aes(x = high_use, y = failures, col =sex))
+g1 + geom_boxplot()
+```
+
+##### Numerical distribution of health
+```{r}
+alc %>% group_by(high_use, sex, health) %>% summarise(count =n())
+```
+
+##### Graphical distribution of health
+```{r}
+health = alc$health
+d=density(health) 
+plot(d)
+polygon(d, col="red", border="blue")
+```
+
+##### Relationship of health with alcohol consumption
+```{r}
+gb <- ggplot(alc, aes(x = high_use, y = health))
+gb + geom_boxplot()
+g2 <- ggplot(alc, aes(x = high_use, y = health, col =sex))
+g2 + geom_boxplot()
+```
+
+##### Numerical distribution of age
+```{r}
+alc %>% group_by(high_use, sex, age) %>% summarise(count =n())
+```
+
+##### Graphical distribution of age
+```{r}
+age = alc$age
+d=density(age) 
+plot(d)
+polygon(d, col="red", border="blue")
+```
+
+##### Relationship of age with alcohol consumption
+```{r}
+gc <- ggplot(alc, aes(x = high_use, y = age))
+gc + geom_boxplot()
+g3 <- ggplot(alc, aes(x = high_use, y = age, col = sex))
+g3 + geom_boxplot()
+```
+
+##### Numerical distribution of freetime
+```{r}
+alc %>% group_by(high_use, sex, freetime) %>% summarise(count =n())
+```
+
+##### Graphical distribution of freetime
+```{r}
+freetime = alc$freetime
+d=density(freetime) 
+plot(d)
+polygon(d, col="red", border="blue")
+```
+
+##### Relationship of freetime with alcohol consumption
+```{r}
+gd <- ggplot(alc, aes(x = high_use, y = freetime))
+gd + geom_boxplot()
+g4 <- ggplot(alc, aes(x = high_use, y = freetime, col =sex))
+g4 + geom_boxplot()
+```
+
+*From the density plots, we can clearly see that only freetime is normally distribued. Other variables are skewed and don't follow normal distribution.*
+
+*From box plot, it seems that failures has an effect on alcohol consumption. Whereas health age an freetime don't have a significant relationship with alcohol consumption.*
+
+*Comparing it to the previously stated hypothesis, everything is in concordance except freetime as I initially thought that freetime affects alcohol consumption.*
+
+
+#### 5. Logistic regression to explore the relationship b/w chosen variables and alcohol consumption
+```{r}
+m <- glm(high_use ~ failures + health + age + freetime, data = alc, family = "binomial")
+summary(m)
+coef(m)
+OR <- coef(m) %>% exp
+OR
+CI <- confint(m) %>% exp
+CI
+cbind(OR, CI)
+```
+
+*In this logistic regression model, we are explaining the variable points i.e. failure, health, age and freetime against high alcohol use. Based on the regression model, failure and freetime have significant relationship with high alcohol use. health and age show no significant relationship with high alcohol use. Intercept is around -5.2, so if explanatory variables are 0, high alcohol use should be around -5.2.*
+
+*Odds ratio for the significant variables failure and freetime are 1.39 and 1.37 respectively. It means that both failures and freetime increase the risk of high alcohol consumption by the factor of around 1.4.The condidence intervals are shown in the table above.*
+
+###CV results keep on changing while knitting because of randomisation of the data. Please keep this in mind, the value written in the report won't match the results so don't deduct the points for it.
+
+#### 6. Variables which have a statistical relationship with alcohol consumption
+```{r}
+m <- glm(high_use ~ failures + freetime, data = alc, family = "binomial")
+summary(m)
+probabilities <- predict(m, type = "response")  
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+table(high_use = alc$high_use, prediction = alc$prediction)
+table(high_use = alc$high_use, prediction = alc$prediction)%>% prop.table() %>% addmargins()
+plot=ggplot(alc, aes(x = probability, y = high_use, col = prediction))
+plot+geom_point()
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alc$high_use, prob = alc$probability)
+```
+
+*The regression model gives better significance (p-values) than the previous model when the insignificant variables are excluded. Also, The model predicted FALSE when it actually was FALSE 68% of time and TRUE when it was TRUE 2% of time.The overall loss/wrong prediction of the model is 0.298 or around 30%*
+
+#### 7. BONUS Cross validation
+```{r}
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+
+*The model error using 10 fold cross validation is 0.2958. The model doesn't improve much after CV (0.298) and also couldn't be made better to compared  to the model in DataCamp (0.26). The reason is that the variables decide the outcome of the model and different chosen variables have different outcomes.*
+
+#### Better model than DataCamp exercise
+
+*Predictors are famrel, freetime and goout*
+
+*Model error = 0.249*
+```{r}
+m <- glm(high_use ~ famrel + freetime + goout, data = alc, family = "binomial")
+summary(m)
+probabilities <- predict(m, type = "response")  
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alc$high_use, prob = alc$probability)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+
+#### 8. SUPERBONUS
+*Didn't plot the graph*
+
+```{r}
+m <- glm(high_use ~ famrel + freetime + goout + sex + failures + health + studytime, data = alc, family = "binomial")
+summary(m)
+probabilities <- predict(m, type = "response")  
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alc$high_use, prob = alc$probability)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+
+
+*Significant variables = famrel, goout, sex, studytime*
+
+*Model error = 0.238*
+
+*Dropping 3 insignificant variables : freetime, failures, health*
+
+```{r}
+m <- glm(high_use ~ famrel + goout + sex + studytime, data = alc, family = "binomial")
+summary(m)
+probabilities <- predict(m, type = "response")  
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alc$high_use, prob = alc$probability)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+
+*Model error = 0.24*
+
+*Dropping goout to see the effect as it contributes to the highest p-value of the model*
+
+```{r}
+m <- glm(high_use ~ famrel + sex + studytime, data = alc, family = "binomial")
+summary(m)
+probabilities <- predict(m, type = "response")  
+alc <- mutate(alc, probability = probabilities)
+alc <- mutate(alc, prediction = probability > 0.5)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+loss_func(class = alc$high_use, prob = alc$probability)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+cv$delta[1]
+```
+
+*Model error = 0.29*
