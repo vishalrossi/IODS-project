@@ -143,6 +143,7 @@ $(document).ready(function () {
 <li><a href="#about-the-project">About the project</a></li>
 <li><a href="#introduction-to-open-data-science">Introduction to Open Data Science</a></li>
 <li><a href="#regression-and-model-validation">Regression and model validation</a></li>
+<li><a href="#logistic-regression">Logistic regression</a></li>
 </ul>
 </div>
 
@@ -281,9 +282,9 @@ $(document).ready(function () {
 <p><em>Residual vs Fitted plot explains about variance in errors. We could see that some errors deviate from the regression line implying that there is issue with the model</em> <em>QQplot of our model shows that most points fall close to the line but some points are not close on the left hand side of the graph, hence the fit is somewhere near to the normality assumption. The model is reasonably okay.</em> <em>Leverage plot shows the impact of a single observation on the model. There are some observations (values of -3) that have a high impact on the model which is not good.</em></p>
 <hr />
 </div>
-<div id="logistic-regression" class="section level4">
-<h4>Logistic regression</h4>
 </div>
+<div id="logistic-regression" class="section level1">
+<h1>Logistic regression</h1>
 <div id="access-the-libraries-needed-for-the-exercise" class="section level4">
 <h4>Access the libraries needed for the exercise</h4>
 <pre class="r"><code>library(dplyr)</code></pre>
@@ -619,8 +620,8 @@ OR</code></pre>
 <p><em>In this logistic regression model, we are explaining the variable points i.e. failure, health, age and freetime against high alcohol use. Based on the regression model, failure and freetime have significant relationship with high alcohol use. health and age show no significant relationship with high alcohol use. Intercept is around -5.2, so if explanatory variables are 0, high alcohol use should be around -5.2.</em></p>
 <p><em>Odds ratio for the significant variables failure and freetime are 1.39 and 1.37 respectively. It means that both failures and freetime increase the risk of high alcohol consumption by the factor of around 1.4.The condidence intervals are shown in the table above.</em></p>
 </div>
-<div id="cv-results-keep-on-changing-while-knitting-because-of-randomisation-of-the-data.-please-keep-this-in-mind-the-value-written-in-the-report-wont-math-the-results-so-dont-deduct-the-points-for-it." class="section level3">
-<h3>CV results keep on changing while knitting because of randomisation of the data. Please keep this in mind, the value written in the report won’t math the results so don’t deduct the points for it.</h3>
+<div id="cv-results-keep-on-changing-while-knitting-because-of-randomisation-of-the-data.-please-keep-this-in-mind-the-value-written-in-the-report-wont-match-the-results-so-dont-deduct-the-points-for-it." class="section level3">
+<h3>CV results keep on changing while knitting because of randomisation of the data. Please keep this in mind, the value written in the report won’t match the results so don’t deduct the points for it.</h3>
 <div id="variables-which-have-a-statistical-relationship-with-alcohol-consumption" class="section level4">
 <h4>6. Variables which have a statistical relationship with alcohol consumption</h4>
 <pre class="r"><code>m &lt;- glm(high_use ~ failures + freetime, data = alc, family = &quot;binomial&quot;)
@@ -672,13 +673,13 @@ plot+geom_point()</code></pre>
 }
 loss_func(class = alc$high_use, prob = alc$probability)</code></pre>
 <pre><code>## [1] 0.2984293</code></pre>
-<p><em>The regression model gives better significance (p-values) than the previous model when the insignificant variables are excluded. Also, The model predicted FALSE when it actually was FALSE 68% of time and TRUE when it was TRUE 2% of time.The overall loss/wrond prediction of the model is 0.298 or around 30%</em></p>
+<p><em>The regression model gives better significance (p-values) than the previous model when the insignificant variables are excluded. Also, The model predicted FALSE when it actually was FALSE 68% of time and TRUE when it was TRUE 2% of time.The overall loss/wrong prediction of the model is 0.298 or around 30%</em></p>
 </div>
 <div id="bonus-cross-validation" class="section level4">
 <h4>7. BONUS Cross validation</h4>
 <pre class="r"><code>cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2958115</code></pre>
+<pre><code>## [1] 0.3010471</code></pre>
 <p><em>The model error using 10 fold cross validation is 0.2958. The model doesn’t improve much after CV (0.298) and also couldn’t be made better to compared to the model in DataCamp (0.26). The reason is that the variables decide the outcome of the model and different chosen variables have different outcomes.</em></p>
 </div>
 <div id="better-model-than-datacamp-exercise" class="section level4">
@@ -723,7 +724,7 @@ loss_func(class = alc$high_use, prob = alc$probability)</code></pre>
 <pre><code>## [1] 0.2460733</code></pre>
 <pre class="r"><code>cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2434555</code></pre>
+<pre><code>## [1] 0.2513089</code></pre>
 </div>
 <div id="superbonus" class="section level4">
 <h4>8. SUPERBONUS</h4>
@@ -770,7 +771,7 @@ loss_func(class = alc$high_use, prob = alc$probability)</code></pre>
 <pre><code>## [1] 0.2277487</code></pre>
 <pre class="r"><code>cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2539267</code></pre>
+<pre><code>## [1] 0.2329843</code></pre>
 <p><em>Significant variables = famrel, goout, sex, studytime</em></p>
 <p><em>Model error = 0.238</em></p>
 <p><em>Dropping 3 insignificant variables : freetime, failures, health</em></p>
@@ -854,7 +855,7 @@ loss_func(class = alc$high_use, prob = alc$probability)</code></pre>
 <pre><code>## [1] 0.2958115</code></pre>
 <pre class="r"><code>cv &lt;- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
 cv$delta[1]</code></pre>
-<pre><code>## [1] 0.2984293</code></pre>
+<pre><code>## [1] 0.2958115</code></pre>
 <p><em>Model error = 0.29</em></p>
 <hr />
 </div>

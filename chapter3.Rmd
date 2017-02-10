@@ -5,7 +5,7 @@ date: "2/8/2017"
 output: html_document
 ---
 
-#### Logistic regression
+# Logistic regression
 #### Access the libraries needed for the exercise
 ```{r}
 library(dplyr)
