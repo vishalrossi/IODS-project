@@ -40,7 +40,7 @@ summary(data)
 
 All the variable have varying degrees of skewness. For example, maternal mortality is highly skewed so that the mean value is close to zero. By contrast, the expected number of years spent in schooling appears to be almost normally distributed. We may then see if the variables are correlated by creating a correlation matrix. Life expectancy and expected years spent in schooling (0.79) and Adolescent birth rate and maternal mortality on the one hand (0.76) have highest positive correlation. The strongest negative correlation is between maternal mortality and life expectancy (-0.86).
 
-#### 3.pca on non-standardized data
+#### 3. Pca on non-standardized data
 ```{r}
 pca=prcomp(data)
 #plot the pca
@@ -49,7 +49,7 @@ biplot(pca, choices = 1:2, cex = c(0.7, 1), col = c("grey40", "deeppink2"))
 
 The biplot is not very informative as the PC1 is not really succeed in classyfying and explore the data. The only variable that is visible in the plot is the GNI because PCA is based on capturing the biggest variation of the dataset.
 
-#### 4-5. pca on standardized data and explanations!!!
+#### 4-5. Pca on standardized data and explanations
 ```{r}
 # standardize the variables
 scale_data <- scale(data)
@@ -79,16 +79,16 @@ dim(tea)
 summary(tea)
 ```
 
-# column names to keep in the dataset
 ```{r}
+# column names to keep in the dataset
 keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
 tea_time <- dplyr::select(tea, one_of(keep_columns))
 mca <- MCA(tea_time, graph = FALSE)
 summary(mca)
 ```
 
-# visualise the analysis
 ```{r}
+# visualise the analysis
 library(tidyr); library(ggplot2)
 gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 ```
