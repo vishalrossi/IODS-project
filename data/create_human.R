@@ -1,6 +1,6 @@
 # Vishal Sinha
 # 2017-02-15
-# Exercise 4: data wrangling
+# Exercise 4 & 5: data wrangling
 
 
 # Read the ???Human development??? and ???Gender inequality??? datas into R
@@ -14,7 +14,7 @@ summary(hd)
 summary(gii)
 
 # Look at the meta files and rename the variables with (shorter) descriptive names.
-colnames(hd) <- c("HDIrank","country","HDI","lifexxp","expedu","meanedu","GNI","rank2")
+colnames(hd) <- c("HDIrank","country","HDI","lifexp","expedu","meanedu","GNI","rank2")
 colnames(gii) <- c("GIIrank","country","GII","matmor","adbi","repparl","edu2F","edu2M","labF","labM")
 
 # Mutate the ???Gender inequality??? data and create two new variables. 
@@ -29,4 +29,31 @@ gii <- mutate(gii, labFMrat = labF / labM)
 human <- inner_join(hd, gii, by = "country")
 
 # Call the new joined data human and save it in your data folder.
-save(human, file="./data/human.RData")
+save(human, file="/Users/vsinha/IODS-project/data/human.RData")
+
+# Data Wrangling exercise for week 5
+dim(human)
+library(stringr)
+str_replace(human$GNI, pattern=",", replace ="") %>% as.numeric
+
+keep_columns <- c("country", "edu2FMrat", "labFMrat", "expedu", "lifexp", "GNI", "matmor", "adbi", "repparl")
+human <- select(human, one_of(keep_columns))
+
+# Removing all rows with missing variables
+keep <- complete.cases(human)
+data.frame(human[-1], comp = keep)
+human <- filter(human, complete.cases(human))
+dim(human)
+
+# Remove regions
+human <- human[1:155,]
+human$Country
+
+
+# Defining row names
+rownames(human) <- human$country
+human <- human[,-1]
+str(human)
+
+# Export thr data
+write.table(human, file="/Users/vsinha/IODS-project/data/human", row.names = TRUE) 

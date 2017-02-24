@@ -1,0 +1,110 @@
+---
+title: "Dimensionality reduction techniques"
+author: "Vishal"
+date: "2/23/2017"
+output: html_document
+---
+# Dimensionality reduction techniques
+
+#### 1. Load and describe the data
+```{r}
+library(ggplot2)
+library("GGally")
+library(corrplot)
+library(dplyr)
+# read the data 
+data = read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt", header=T)
+```
+
+The human dataset contains various indicators of the well-being of various countries. The summary shows, there are altogether 155 observations (i.e. countries) and these are the variables:
+1. Edu2.FM: the ratio of females to males in secondary education
+2. Labo.FM: the ratio of females to males in the labour force
+3. Edu.Exp: expected number of years spent in schooling
+4. Life.Exp: life expectancy in years
+5. GNI: gross national income
+6. Mat.Mor: the relativised number of mothers who die at child birth
+7. Ado.Birth: the rate of teenage pregnancies leading to child birth
+8. Parli.F: the percentage of female parliamentarians
+
+
+#### 2. Graphical overview of the data
+```{r}
+#plot the variables
+ggpairs(data) + ggtitle("All variables against each other")
+# plot correlation matrix
+cor_matrix<-cor(data) 
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6, addCoef.col = "black")
+# summary of the data
+summary(data)
+```
+
+All the variable have varying degrees of skewness. For example, maternal mortality is highly skewed so that the mean value is close to zero. By contrast, the expected number of years spent in schooling appears to be almost normally distributed. We may then see if the variables are correlated by creating a correlation matrix. Life expectancy and expected years spent in schooling (0.79) and Adolescent birth rate and maternal mortality on the one hand (0.76) have highest positive correlation. The strongest negative correlation is between maternal mortality and life expectancy (-0.86).
+
+#### 3.pca on non-standardized data
+```{r}
+pca=prcomp(data)
+#plot the pca
+biplot(pca, choices = 1:2, cex = c(0.7, 1), col = c("grey40", "deeppink2"))
+```
+
+The biplot is not very informative as the PC1 is not really succeed in classyfying and explore the data. The only variable that is visible in the plot is the GNI because PCA is based on capturing the biggest variation of the dataset.
+
+#### 4-5. pca on standardized data and explanations!!!
+```{r}
+# standardize the variables
+scale_data <- scale(data)
+# summary of standardise variables
+summary(scale_data)
+#pca on scaled data
+pca_scaled=prcomp(scale_data)
+summary(pca_scaled)
+#plot the pca
+biplot(pca_scaled, choices = 1:2, cex = c(0.7, 1), col = c("grey40", "deeppink2"))
+```
+
+As shown in the second PCA plot, variables associated clearly with PC1 and others with PC2. The result is different from the previous plot mainly because the data has been scaled. 
+
+There are three broad groups in the second PCA analysis.
+* The first group consists of variables Edu.Exp, Edu2.FM, Life.Exp and GNI. They are all very closely aligned with negative values of PC1. A high score in these variables is associated with western countries. They display equality, well-being and prosperity.
+* The second group consists of variables Mat.Mor and Ado.Birth. They are also associated with PC1, but correlate positively with it and are thus diametrically opposite to the first group. They display a lack of basic healthcare.
+* The third group consists of variables Labo.FM and Parli.F. They are associated with PC2. Recall that these variables had little correlation with the others. They are related to formal gender equality, which, interestingly, may be fulfilled in both rich and poor countries.
+
+#### 6. MCA
+```{r}
+library(FactoMineR)
+data(tea)
+#This is the tea dataset from the package FactoMineR.
+str(tea)
+dim(tea)
+summary(tea)
+```
+
+# column names to keep in the dataset
+```{r}
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+tea_time <- dplyr::select(tea, one_of(keep_columns))
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+```
+
+# visualise the analysis
+```{r}
+library(tidyr); library(ggplot2)
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+```
+These barplots show that tea drinking habit is highly variable among people. Sugar intake is more or less same. However people drink at mostly at chain stores using tea bags.
+
+```{r}
+library(factoextra)
+eigenvalues <- get_eigenvalue(mca)
+head(round(eigenvalues, 2))
+fviz_screeplot(mca)
+```
+
+From the table and the graph above, we can see that the first 6 dimensions explain nearly 70% of the data.
+
+```{r}
+fviz_mca_biplot(mca)
+```
+
+The biplot shows the trend within the data. Rows that contists of individuals are shown by blue points and number, whereas the columns (variable categories) by red triangles. The distance between any row points or column points gives a measure of their similarity or dissimilarity. Thus row/column points with similar profile are closed on the factor map.
